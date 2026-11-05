@@ -1,0 +1,13 @@
+# SQLite runtime
+
+Development version 0.1.0 requires **actual linked SQLite 3.51.3 or newer**. The application queries `sqlite_version()` and `sqlite_source_id()` at its connection boundary. This deliberately excludes older version strings even if a vendor may have backported fixes: a distribution name is not proof of a specific patch. The [upstream WAL-reset fix](https://www.sqlite.org/wal.html#the_wal_reset_bug) first shipped in 3.51.3. This runtime update does not claim that an earlier test run suffered corruption.
+
+The supplied Dockerfile compiles the official SQLite **3.54.1** amalgamation in an isolated GCC 14 builder and copies only its shared library into the pinned runtime image. It verifies the archive SHA-256 before unpacking. The recorded SHA-256 was derived from the archive whose SHA3-256 was checked against the [official download metadata](https://www.sqlite.org/download.html). Exact archive identity and source ID are committed in `tools/sqlite-source.json`. No upstream SQLite source is vendored; SQLite's upstream public-domain terms apply independently of this project's MIT license.
+
+The image sets `LD_LIBRARY_PATH=/opt/sqlite/lib`. Its qualification script uses an in-memory database, checks exact version/source ID, creates a real FTS5 table and verifies Café/cafe matching. FTS5 is a build qualification check, not a new application feature. A Docker tag, PHP version or Python version is insufficient qualification. The binary runtime and compiler bases are digest-pinned for the supplied Linux x86-64 CI environment; no claim of bit-identical compiler output on every host is made.
+
+Dependency preparation requires access only to the official base images and SQLite source. After preparation, tests and demos run offline and unprivileged. Existing transaction behavior, caller read-only access, journal mode, snapshot semantics and cleanup ownership are preserved; the runtime guard never changes journal mode. Review local filesystem and WAL assumptions before using a caller-controlled database.
+
+## Português
+
+A versão de desenvolvimento 0.1.0 exige SQLite **3.51.3+ realmente vinculado**, consultado por SQL. Versões antigas são rejeitadas mesmo quando uma distribuição pode ter backports, pois o projeto não tenta deduzir a correção pelo nome da distribuição. A imagem fornecida compila SQLite 3.54.1 oficial com checksum verificado e confere versão, source ID e FTS5 em memória. A preparação usa rede; testes e demos rodam sem rede e sem privilégios. O guard não altera o modo de journal nem as transações. Esta atualização não afirma que houve corrupção em execuções anteriores.

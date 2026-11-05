@@ -1,32 +1,25 @@
-name: ci
-
+name: SQLite runtime checks
 on:
   push:
-    branches:
-      - main
   pull_request:
-
 permissions:
   contents: read
-
 jobs:
-  test:
-    name: Python 3.13 Unittest & Demo
+  offline-checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    container:
-      image: python:3.13-slim-bookworm
+    timeout-minutes: 10
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-
-      - name: Verify Python version
-        run: python3 --version
-
-      - name: Run unit and contention test suite
-        run: python3 -m unittest discover -s tests -v
-
-      - name: Run deterministic offline demo (JSON and text)
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare checksum-pinned SQLite runtime
+        run: docker build --tag transactional-outbox-lab-ci .
+        timeout-minutes: 5
+      - name: Qualify linked SQLite and FTS5
+        run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --pids-limit 256 --memory 1g --cpus 2 --read-only --tmpfs /tmp:rw,exec,nosuid,nodev,size=512m transactional-outbox-lab-ci python3 tools/qualify_sqlite.py
+      - name: Standard-library regression and adversarial tests
+        run: docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --pids-limit 256 --memory 1g --cpus 2 --read-only --tmpfs /tmp:rw,exec,nosuid,nodev,size=512m transactional-outbox-lab-ci python3 -m unittest discover -s tests -v
+      - name: Offline demos
         run: |
-          python3 -m outbox_lab demo
-          python3 -m outbox_lab demo --format text
+          docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --pids-limit 256 --memory 1g --cpus 2 --read-only --tmpfs /tmp:rw,exec,nosuid,nodev,size=512m transactional-outbox-lab-ci python3 -m outbox_lab demo
+          docker run --rm --network none --cap-drop ALL --security-opt no-new-privileges --pids-limit 256 --memory 1g --cpus 2 --read-only --tmpfs /tmp:rw,exec,nosuid,nodev,size=512m transactional-outbox-lab-ci python3 -m outbox_lab demo --format text

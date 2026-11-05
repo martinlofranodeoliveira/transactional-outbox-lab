@@ -28,3 +28,5 @@
 
 - Check CLI output/diagnostic flush and keep failed OS streams from being retried at interpreter shutdown.
 - Verifica flush da saída/diagnósticos e evita nova tentativa em streams já falhos no encerramento.
+
+* Qualify actual linked SQLite 3.51.3+ and provide a checksum-pinned SQLite 3.54.1 runtime build; preserve journal and transaction semantics.

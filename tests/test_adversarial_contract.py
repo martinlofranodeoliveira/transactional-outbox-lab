@@ -6,6 +6,7 @@ import multiprocessing
 import sqlite3
 import tempfile
 import unittest
+from unittest.mock import patch
 from dataclasses import replace
 from pathlib import Path
 
@@ -59,6 +60,20 @@ class AdversarialContractTests(unittest.TestCase):
 
     def claim(self, *, now: int = 0, duration: int = 10):
         return self.store.claim_batch(worker_id="a", now_ms=now, lease_duration_ms=duration)[0]
+
+    def test_unqualified_runtime_is_rejected_before_schema_write_and_connection_closed(self) -> None:
+        for version in ("3.40.1", "3.46.1", "3.51.2"):
+            connection = sqlite3.connect(":memory:", isolation_level=None)
+            connection.create_function("sqlite_version", 0, lambda value=version: value)
+            statements = []
+            connection.set_trace_callback(statements.append)
+            with patch("outbox_lab.store.sqlite3.connect", return_value=connection):
+                with self.assertRaises(OutboxConstraintError):
+                    OutboxStore(":memory:")
+            self.assertTrue(statements)
+            self.assertTrue(all(statement.startswith("SELECT sqlite_version()") for statement in statements))
+            with self.assertRaises(sqlite3.ProgrammingError):
+                connection.execute("SELECT 1")
 
     def test_close_is_idempotent_and_closed_use_is_structured(self) -> None:
         self.store.close()

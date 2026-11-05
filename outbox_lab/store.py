@@ -20,6 +20,7 @@ from outbox_lab.errors import (
     StaleFencingTokenError,
     StoreBusyError,
 )
+from outbox_lab.runtime import require_qualified_sqlite
 from outbox_lab.models import AuditEntry, DomainMutation, DomainRecord, OutboxDraft, OutboxRecord, OutboxState
 from outbox_lab.validation import (
     INT64_MAX,
@@ -135,6 +136,7 @@ class OutboxStore:
             self._conn = sqlite3.connect(
                 self._db_path, timeout=busy_timeout_ms / 1000, isolation_level=None
             )
+            require_qualified_sqlite(self._conn)
             self._conn.row_factory = sqlite3.Row
             self._conn.execute("PRAGMA foreign_keys = ON")
             if initialize_schema:
@@ -142,6 +144,9 @@ class OutboxStore:
         except sqlite3.Error as exc:
             self.close()
             self._raise_storage_error(exc)
+        except RuntimeError as exc:
+            self.close()
+            raise OutboxConstraintError("Actual linked SQLite 3.51.3 or newer is required") from exc
 
     @property
     def db_path(self) -> str:

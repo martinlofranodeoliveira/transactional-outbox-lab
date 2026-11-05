@@ -2,7 +2,7 @@
 
 **Versão de desenvolvimento 0.1.0** · [Lofrano Tecnologia](https://lofranotecnologia.com.br) · [Repositório](https://github.com/martinlofranodeoliveira/transactional-outbox-lab) · [English](README.md)
 
-Biblioteca e laboratório offline de **Transactional Outbox** em Python 3.13 com SQLite e somente biblioteca padrão. Demonstra escrita atômica no produtor, retentativas determinísticas, retomada de leases, fencing e entrega duplicada após perda da confirmação pós-envio. Não depende de serviços, modelos ou APIs em execução e não utiliza telemetria nem rede.
+Biblioteca e laboratório offline de **Transactional Outbox** em Python 3.13 com SQLite 3.51.3+ realmente vinculado e somente biblioteca padrão. Demonstra escrita atômica no produtor, retentativas determinísticas, retomada de leases, fencing e entrega duplicada após perda da confirmação pós-envio. Não depende de serviços, modelos ou APIs em execução e não utiliza telemetria nem rede.
 
 ## Instalação, testes e demonstração
 
@@ -89,3 +89,7 @@ Se o worker enviar e cair antes do commit de `mark_published`, a recuperação p
 - [Contribuição](CONTRIBUTING.md), [Segurança](SECURITY.md), [Histórico](CHANGELOG.md)
 
 Licença MIT, copyright 2026 Lofrano Tecnologia. Contato geral: [site oficial](https://lofranotecnologia.com.br).
+
+## Runtime SQLite
+
+Use a [compilação com checksum e qualificação por SQL](docs/sqlite-runtime.md). A aplicação exige SQLite 3.51.3+ realmente vinculado; a imagem fornecida usa 3.54.1. Compile com `docker build -t transactional-outbox-lab-sqlite .` e execute os comandos documentados de teste/demo com `docker run --rm --network none transactional-outbox-lab-sqlite <argv>`. Instalações nativas devem fornecer SQLite na faixa suportada.
