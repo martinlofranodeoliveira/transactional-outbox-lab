@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "transactional-outbox-lab"
+version = "0.1.0"
+description = "Reproducible SQLite library and integration lab demonstrating the Transactional Outbox pattern with explicit at-least-once delivery semantics, lease fencing tokens, and deterministic logical clocks."
+readme = "README.md"
+requires-python = ">=3.13"
+license = { text = "MIT" }
+authors = [
+  { name = "Lofrano Tecnologia" }
+]
+keywords = [
+  "sqlite",
+  "transactional-outbox",
+  "at-least-once",
+  "fencing-token",
+  "distributed-systems",
+  "event-driven"
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Database",
+  "Topic :: Software Development :: Libraries :: Python Modules"
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://lofranotecnologia.com.br"
+Repository = "https://github.com/martinlofranodeoliveira/transactional-outbox-lab"
+Security = "https://github.com/martinlofranodeoliveira/transactional-outbox-lab/security/advisories/new"
+
+[project.scripts]
+outbox-lab = "outbox_lab.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["outbox_lab*"]
